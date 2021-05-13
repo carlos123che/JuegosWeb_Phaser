@@ -1,4 +1,5 @@
 var AMOUNT_DIAMONDS = 29;
+var AMOUNT_B = 30;
 GamePlayManager = {
     init: function(){ //se llama de primero, podemos inicializar variables
         game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL; //para escalar la pantalla
@@ -9,6 +10,8 @@ GamePlayManager = {
         //logica del juego
         this.amountDiamondCaught = 0;
         this.endGame = false;
+
+        this.countsmile = -1;
     },
     preload: function(){ //cargar los recursos necesarios
         game.load.image('background', './assets/images/background.png'); //asi se carga una imagen
@@ -26,10 +29,31 @@ GamePlayManager = {
 
         /** EXPLOSION CUANDO COLISIONAN EL CABALLO Y EL DIAMANTE */
         game.load.image('explosion', './assets/images/explosion.png'); //asi se carga una imagen
+
+        //ANIMACIONES FINALES
+        game.load.image('shark', './assets/images/shark.png');
+        game.load.image('fishes', './assets/images/fishes.png');
+        game.load.image('mollusk', './assets/images/mollusk.png');
+        game.load.image('b1', './assets/images/booble1.png');
+        game.load.image('b2', './assets/images/booble2.png');
     },
     create: function(){// tenemos todo cargados los recursos y poderlos usar
         game.add.sprite(0, 0, 'background'); //asi se agrega una imagen, primeo debe estar cargada
         //primero se ponen las coordenadas donde se quiere cargar y luego que imagen se desea cargar
+
+        this.booblearray = [];
+        for (let i = 0; i < AMOUNT_B; i++) {
+            var xbooble = game.rnd.integerInRange(1, 1140);      
+            var ybooble = game.rnd.integerInRange(600, 950);      
+            var booble = game.add.sprite(xbooble, ybooble, 'b'+ game.rnd.integerInRange(1,2));
+            booble.vel = 0.2 +  game.rnd.frac() * 2;
+            booble.alpha = 0.85;
+            booble.scale.setTo(0.2 + game.rnd.frac());
+            this.booblearray.push(booble);
+        }
+        this.mollusk = game.add.sprite(500, 150, 'mollusk');
+        this.shark = game.add.sprite(500, 20, 'shark');
+        this.fishes = game.add.sprite(100, 550, 'fishes');
 
         this.horse = game.add.sprite(0,0, 'horse'); //guardamos una instancia del spritesheet creado
         this.horse.frame = 1; //.frame = es la imagen selecionada
@@ -127,6 +151,8 @@ GamePlayManager = {
 
     },
     increseScore:function(){
+        this.countsmile = 0;
+        this.horse.frame = 1;
         this.currentScore += 100;
         this.scoreText.text = this.currentScore;
 
@@ -153,6 +179,11 @@ GamePlayManager = {
         this.textFieldFinalMSG.anchor.setTo(0.5);
     },
     onTap: function(){
+        if(!this.flagFirstMouseDown){
+            this.tweenMollusk= game.add.tween( this.mollusk.position).to( 
+                {y:-0.001}, 4000, Phaser.Easing.Cubic.InOut, true ,0, 1000, true
+                ).loop(true);
+        }
         this.flagFirstMouseDown = true;
     },
     getBoundsDiamond: function(currentDiamond){ //devuelce un rectangulo con las coordenadas del diamante
@@ -196,6 +227,32 @@ GamePlayManager = {
         /**********Hacer que el caballo siga a nuestro mouse**********/
         
         if(this.flagFirstMouseDown && !this.endGame){
+
+            this.booblearray.forEach(element => {
+                element.y -= element.vel;
+                if(element.y < -50){
+                    element.y = 700;
+                    element.x = game.rnd.integerInRange(1,1140);
+                }
+            });
+
+            if(this.countsmile >= 0){
+                this.countsmile++;
+                if(this.countsmile > 40){
+                        this.countsmile = -1;
+                        this.horse.frame = 0;
+                }
+            }
+
+            this.shark.x-= 1.5;
+            if(this.shark.x < -300){
+                this.shark.x = 1300
+            }
+
+            this.fishes.x += 0.9
+            if(this.fishes.x > 1300){
+                this.fishes.x = -300;
+            }
             //game.input.x  devuele las coordenadas x del mouse y Y la de Y
             var pointerX = game.input.x;
             var pointerY = game.input.y;
