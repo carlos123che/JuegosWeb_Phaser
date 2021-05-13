@@ -1,6 +1,9 @@
 GamePlayManager = {
     init: function(){ //se llama de primero, podemos inicializar variables
-        console.log('init');
+        game.scale.scaleMode = Phase.ScaleManager.SHOW_ALL; //para escalar la pantalla
+        //para alinear horizontal y verticalmente
+        game.scale.pageAlignHorizontally = true;
+        game.scale.pageAlignVertically = true;
     },
     preload: function(){ //cargar los recursos necesarios
         game.load.image('background', './assets/images/background.png'); //asi se carga una imagen
@@ -12,7 +15,7 @@ GamePlayManager = {
         //primero se ponen las coordenadas donde se quiere cargar y luego que imagen se desea cargar
     },
     update: function(){//frame a frame se llama este metodo
-        console.log('update');
+        
     }
 }
 var game = new Phaser.Game(1136, 640, Phaser.AUTO);
