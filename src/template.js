@@ -4,6 +4,7 @@ GamePlayManager = {
         //para alinear horizontal y verticalmente
         game.scale.pageAlignHorizontally = true;
         game.scale.pageAlignVertically = true;
+        this.flagFirstMouseDown = false;
     },
     preload: function(){ //cargar los recursos necesarios
         game.load.image('background', './assets/images/background.png'); //asi se carga una imagen
@@ -28,17 +29,42 @@ GamePlayManager = {
 
         //por el anchor, default 0,0 el caballo no esta en el centro sino en su esquina 0x 0y
         this.horse.anchor.setTo(0.5, 0.5);//con esto modifico el anchor y si esta en el centro
-        /***********rotar ****************/
+       /*  //***********rotar ****************
         this.horse.angle = 30;
-        /**************escalado**************/
+        //**************escalado**************
         this.horse.scale.setTo(1,2)
-        /********opacidad*********************/
-        this.horse.alpha = 0.6;
+        //********opacidad*********************
+        this.horse.alpha = 0.6; */
 
+        //capturar un click en pantalla
+        game.input.onDown.add(this.onTap, this);
 
+    },
+    onTap: function(){
+        this.flagFirstMouseDown = true;
     },
     update: function(){//frame a frame se llama este metodo
         // this.horse.angle += 1;  asi se rotaria un grado en caballo
+
+        /**********Hacer que el caballo siga a nuestro mouse**********/
+        
+        if(this.flagFirstMouseDown){
+            //game.input.x  devuele las coordenadas x del mouse y Y la de Y
+            var pointerX = game.input.x;
+            var pointerY = game.input.y;
+            // calcular la distancia entre el caballo y el mouse
+            var distX = pointerX - this.horse.x;
+            var distY = pointerY - this.horse.y;
+            //hacer que el caballo mire a donde a el mouse
+            if(distX>0){ //el mouse esta a la derecha
+                this.horse.scale.setTo(1,1);
+            }else{//el mouse esta ala izquierda
+                this.horse.scale.setTo(-1, 1);
+            }
+            //hacer que el caballo persiga al mouse
+            this.horse.x  += distX * 0.02;
+            this.horse.y += distY * 0.02;
+        }
     }
 }
 var game = new Phaser.Game(1136, 640, Phaser.AUTO);
