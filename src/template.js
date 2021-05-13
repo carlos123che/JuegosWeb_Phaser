@@ -6,6 +6,9 @@ GamePlayManager = {
         game.scale.pageAlignHorizontally = true;
         game.scale.pageAlignVertically = true;
         this.flagFirstMouseDown = false;
+        //logica del juego
+        this.amountDiamondCaught = 0;
+        this.endGame = false;
     },
     preload: function(){ //cargar los recursos necesarios
         game.load.image('background', './assets/images/background.png'); //asi se carga una imagen
@@ -96,7 +99,40 @@ GamePlayManager = {
             this.explosion.kill();
         }
 
-        
+        //agregar texto al juego
+        this.currentScore = 0;
+        var style = {
+            font: 'bold 30pt Arial',
+            fill: '#FFFF',
+            align: 'center'
+        }
+        this.scoreText = game.add.text(game.width/2, 40, '0', style); //primero va la x luego la y y por ultimo el mensaje estilo opcional
+        this.scoreText.anchor.setTo(0.5);
+    },
+    increseScore:function(){
+        this.currentScore += 100;
+        this.scoreText.text = this.currentScore;
+
+        //logica del juego
+        this.amountDiamondCaught++;
+        if(this.amountDiamondCaught >= AMOUNT_DIAMONDS){
+            this.showFinalMessage('CONGRATULATIONS!!!');
+            this.endGame = true;
+        }
+    },
+    showFinalMessage: function(mssg){
+        var bgAlpha = game.add.bitmapData(game.width, game.height);
+        bgAlpha.ctx.fillStyle = '#000';
+        bgAlpha.ctx.fillRect(0,0, game.width, game.height);
+        var bg = game.add.sprite(0,0,bgAlpha);
+        bg.alpha = 0.5;
+        var style = {
+            font: 'bold 60pt Arial',
+            fill: '#FFFF',
+            align: 'center'
+        }
+        this.textFieldFinalMSG = game.add.text(game.width/2, game.height/2, mssg, style);
+        this.textFieldFinalMSG.anchor.setTo(0.5);
     },
     onTap: function(){
         this.flagFirstMouseDown = true;
@@ -141,7 +177,7 @@ GamePlayManager = {
 
         /**********Hacer que el caballo siga a nuestro mouse**********/
         
-        if(this.flagFirstMouseDown){
+        if(this.flagFirstMouseDown && !this.endGame){
             //game.input.x  devuele las coordenadas x del mouse y Y la de Y
             var pointerX = game.input.x;
             var pointerY = game.input.y;
@@ -164,7 +200,7 @@ GamePlayManager = {
                 //chequeo si colisionan
                 if(this.diamonds[i].visible  && this.isRectanglesOverlapping(rectHorse, rectDiamond)){
                     this.diamonds[i].visible = false;
-
+                    this.increseScore();
                     var explosion = this.explosionGroup.getFirstDead();
                     if(explosion!=null){
                         explosion.reset(this.diamonds[i].x, this.diamonds[i].y);
