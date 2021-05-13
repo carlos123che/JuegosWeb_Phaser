@@ -1,3 +1,4 @@
+var AMOUNT_DIAMONDS = 29;
 GamePlayManager = {
     init: function(){ //se llama de primero, podemos inicializar variables
         game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL; //para escalar la pantalla
@@ -16,6 +17,10 @@ GamePlayManager = {
         //luego la ruta, luego ancho y alto de la imagen a dividir:
         //la imagen media 168 entonce su mitad de ancho es 84  y por utlimo
         //va en cuanto lo queriamos dividir en este caso en 2
+
+        /*********************CARGAR DIAMANTES *********************/
+        game.load.spritesheet('diamonds', './assets/images/diamonds.png', 81, 84, 4);
+
     },
     create: function(){// tenemos todo cargados los recursos y poderlos usar
         game.add.sprite(0, 0, 'background'); //asi se agrega una imagen, primeo debe estar cargada
@@ -39,9 +44,50 @@ GamePlayManager = {
         //capturar un click en pantalla
         game.input.onDown.add(this.onTap, this);
 
+        /************AGREGAR DIAMANTES AL JUEGO**************/
+        this.diamonds = [];
+        for( var i=0; i<AMOUNT_DIAMONDS; i++){
+            var diamond = game.add.sprite(100, 100, 'diamonds');
+            diamond.frame = game.rnd.integerInRange(0,3); // obtenemos un random para determinar que frame usar
+            diamond.scale.setTo(0.30 + game.rnd.frac()) //game.rnd.frac nos devulene un valor entre 0 y 1
+            diamond.anchor.setTo(0.5);
+            diamond.alpha = 0.55;
+            diamond.x = game.rnd.integerInRange(50, 1050);
+            diamond.y = game.rnd.integerInRange(50, 600);
+            this.diamonds.push(diamond);
+            var CURRENT_DIAMOND = this.getBoundsDiamond(diamond);
+            const HORSE_RECT = this.getBoundsDiamond(this.horse);
+
+            while(this.isOverlapOhterDiamond(i, CURRENT_DIAMOND) ||  this.isRectanglesOverlapping(HORSE_RECT, CURRENT_DIAMOND)){
+                diamond.x = game.rnd.integerInRange(50, 1050);
+                diamond.y = game.rnd.integerInRange(50, 600);
+                CURRENT_DIAMOND = this.getBoundsDiamond(diamond);
+            }
+        }
     },
     onTap: function(){
         this.flagFirstMouseDown = true;
+    },
+    getBoundsDiamond: function(currentDiamond){ //devuelce un rectangulo con las coordenadas del diamante
+        return new Phaser.Rectangle(currentDiamond.left, currentDiamond.top, currentDiamond.width, currentDiamond.height);
+    },
+    isRectanglesOverlapping: function(rect1, rect2){
+        if( rect1.x > rect2.x + rect2.width || rect2.x > rect1.x + rect1.width){
+            return false;
+        }
+        if( rect1.y > rect2.y + rect2.height || rect2.y > rect1.y + rect1.height){
+            return false;
+        }
+        return true;
+    },
+    isOverlapOhterDiamond: function(index, rect2){
+        for(var i=0; i<index; i++){
+            var rect1 = this.getBoundsDiamond(this.diamonds[i]);
+            if(this.isRectanglesOverlapping(rect1, rect2)){
+                return true;
+            }
+        }
+        return false;
     },
     update: function(){//frame a frame se llama este metodo
         // this.horse.angle += 1;  asi se rotaria un grado en caballo
@@ -64,6 +110,8 @@ GamePlayManager = {
             //hacer que el caballo persiga al mouse
             this.horse.x  += distX * 0.02;
             this.horse.y += distY * 0.02;
+
+
         }
     }
 }
