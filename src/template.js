@@ -21,6 +21,8 @@ GamePlayManager = {
         /*********************CARGAR DIAMANTES *********************/
         game.load.spritesheet('diamonds', './assets/images/diamonds.png', 81, 84, 4);
 
+        /** EXPLOSION CUANDO COLISIONAN EL CABALLO Y EL DIAMANTE */
+        game.load.image('explosion', './assets/images/explosion.png'); //asi se carga una imagen
     },
     create: function(){// tenemos todo cargados los recursos y poderlos usar
         game.add.sprite(0, 0, 'background'); //asi se agrega una imagen, primeo debe estar cargada
@@ -54,7 +56,7 @@ GamePlayManager = {
             diamond.alpha = 0.55;
             diamond.x = game.rnd.integerInRange(50, 1050);
             diamond.y = game.rnd.integerInRange(50, 600);
-            this.diamonds.push(diamond);
+            this.diamonds[i] = (diamond);
             var CURRENT_DIAMOND = this.getBoundsDiamond(diamond);
             const HORSE_RECT = this.getBoundsDiamond(this.horse);
 
@@ -64,6 +66,37 @@ GamePlayManager = {
                 CURRENT_DIAMOND = this.getBoundsDiamond(diamond);
             }
         }
+        /***CREAR UN GRUOP */
+        this.explosionGroup = game.add.group(); //el grupo lo podemos modificar como si fuera un sprite
+            /* this.explosionGroup.create(200,200, 'explosion');
+
+            var newExplosion = this.explosionGroup.getFirstDead();
+            console.log(newExplosion); */
+
+        for( var i=0; i<10; i++){ //crear 10 elementos del grupo
+            //crear efectos de tween para sprites
+            this.explosion = this.explosionGroup.create(100, 100, 'explosion');
+            /* var tween = game.add.tween(this.explosion); //guardo instancia del tween
+            tween.to({x:500, y:100}, 1500, Phaser.Easing.Exponential.Out); //primero va la posicion, luego velocidad
+            //y luego efecto y velocidad
+            tween.start();//se incia el tween */
+            this.explosion.tweenScale = game.add.tween(this.explosion.scale).to({
+                x: [0.4, 0.8, 0.4],
+                y: [0.4, 0.8, 0.4]
+            }, 600, Phaser.Easing.Exponential.Out, false, 0,0, false);
+            
+            //600, Phaser.Easing.Exponential.Out, false, 0,0, false) durara 600 milisengundo, efecto
+            // que se incie al inicio o no, si queremos un delay, cuantas veces queremos que se repita
+            //si querremos que vaya y  vuelva
+            this.explosion.tweenAlpha = game.add.tween(this.explosion).to({
+                alpha: [1, 0.6, 0]
+            }, 600, Phaser.Easing.Exponential.Out, false, 0,0, false);
+            this.explosion.anchor.setTo(0.5);
+            // this.explosion.visible = false;
+            this.explosion.kill();
+        }
+
+        
     },
     onTap: function(){
         this.flagFirstMouseDown = true;
@@ -98,10 +131,10 @@ GamePlayManager = {
         return new Phaser.Rectangle(x0, y0, width, height);
     },
     render: function(){
-        game.debug.spriteBounds(this.horse);
+       /*  game.debug.spriteBounds(this.horse);
         for(var i=0; i<AMOUNT_DIAMONDS; i++){
             game.debug.spriteBounds(this.diamonds[i]);
-        }
+        } */
     },
     update: function(){//frame a frame se llama este metodo
         // this.horse.angle += 1;  asi se rotaria un grado en caballo
@@ -129,8 +162,20 @@ GamePlayManager = {
                 var rectHorse = this.getBoundsHorse();
                 var rectDiamond = this.getBoundsDiamond(this.diamonds[i]);
                 //chequeo si colisionan
-                if(this.isRectanglesOverlapping(rectHorse, rectDiamond)){
-                    console.log('collision');
+                if(this.diamonds[i].visible  && this.isRectanglesOverlapping(rectHorse, rectDiamond)){
+                    this.diamonds[i].visible = false;
+
+                    var explosion = this.explosionGroup.getFirstDead();
+                    if(explosion!=null){
+                        explosion.reset(this.diamonds[i].x, this.diamonds[i].y);
+                        explosion.tweenScale.start();
+                        explosion.tweenAlpha.start();
+
+                        explosion.tweenAlpha.onComplete.add(function(currentTarget, currentTween){
+                            currentTarget.kill();
+                        }, this);
+                    }
+                    
                 }
             }
         }
