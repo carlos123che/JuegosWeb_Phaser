@@ -9,6 +9,7 @@ GamePlayManager = {
         game.load.image('background', './assets/images/background.png'); //asi se carga una imagen
         //el primer parametro es el nombre de instancia para identeificar la imagen
         //el segundo es la ruta
+
         game.load.spritesheet('horse', './assets/images/horse.png', 84, 156, 2);
         //spritesheet es para dividir una imagen en dos, se ponee el identificado
         //luego la ruta, luego ancho y alto de la imagen a dividir:
@@ -18,15 +19,26 @@ GamePlayManager = {
     create: function(){// tenemos todo cargados los recursos y poderlos usar
         game.add.sprite(0, 0, 'background'); //asi se agrega una imagen, primeo debe estar cargada
         //primero se ponen las coordenadas donde se quiere cargar y luego que imagen se desea cargar
+
         this.horse = game.add.sprite(0,0, 'horse'); //guardamos una instancia del spritesheet creado
         this.horse.frame = 1; //.frame = es la imagen selecionada
         /*centramos la imagen al centro */
         this.horse.x = game.width/2;
         this.horse.y= game.height/2;
-        
+
+        //por el anchor, default 0,0 el caballo no esta en el centro sino en su esquina 0x 0y
+        this.horse.anchor.setTo(0.5, 0.5);//con esto modifico el anchor y si esta en el centro
+        /***********rotar ****************/
+        this.horse.angle = 30;
+        /**************escalado**************/
+        this.horse.scale.setTo(1,2)
+        /********opacidad*********************/
+        this.horse.alpha = 0.6;
+
+
     },
     update: function(){//frame a frame se llama este metodo
-        
+        // this.horse.angle += 1;  asi se rotaria un grado en caballo
     }
 }
 var game = new Phaser.Game(1136, 640, Phaser.AUTO);
