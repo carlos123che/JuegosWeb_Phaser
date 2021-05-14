@@ -78,7 +78,7 @@ GamePlayManager = {
         for( var i=0; i<AMOUNT_DIAMONDS; i++){
             var diamond = game.add.sprite(100, 100, 'diamonds');
             diamond.frame = game.rnd.integerInRange(0,3); // obtenemos un random para determinar que frame usar
-            diamond.scale.setTo(0.30 + game.rnd.frac()) //game.rnd.frac nos devulene un valor entre 0 y 1
+            diamond.scale.setTo(0.50 + game.rnd.frac()) //game.rnd.frac nos devulene un valor entre 0 y 1
             diamond.anchor.setTo(0.5);
             diamond.alpha = 0.55;
             diamond.x = game.rnd.integerInRange(50, 1050);
@@ -133,7 +133,7 @@ GamePlayManager = {
         this.scoreText = game.add.text(game.width/2, 40, '0', style); //primero va la x luego la y y por ultimo el mensaje estilo opcional
         this.scoreText.anchor.setTo(0.5);
 
-        this.totalTime = 13;
+        this.totalTime = 18;
         this.timerText = game.add.text(1000, 40, this.totalTime, style); //primero va la x luego la y y por ultimo el mensaje estilo opcional
         this.timerText.anchor.setTo(0.5);
         /**crear un timer */
